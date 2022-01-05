@@ -1399,6 +1399,10 @@ public class ProjectGenerator {
 
     ImmutableSortedSet<SourceWithFlags> allSrcs = allSrcsBuilder.build();
 
+    boolean shouldAddSwiftDeps = false;
+    boolean swiftBuildPhasesDependencies = swiftBuckConfig.getBuildPhasesDependencies();
+    ImmutableSet<TargetNode<?>> swiftDepTargets = null;
+
     if (!options.shouldGenerateHeaderSymlinkTreesOnly()) {
       if (isFocusedOnTarget) {
         filesAddedBuilder.addAll(
@@ -1481,7 +1485,7 @@ public class ProjectGenerator {
       }
 
       if (isFocusedOnTarget) {
-        ImmutableSet<TargetNode<?>> swiftDepTargets =
+        swiftDepTargets =
             filterRecursiveLibraryDepTargetsWithSwiftSources(depTargetNodes);
 
         if (!includeFrameworks && !swiftDepTargets.isEmpty()) {
@@ -1496,22 +1500,26 @@ public class ProjectGenerator {
           // To be on the safe side, we're explicitly marking the copy phase as only running for
           // deployment postprocessing (i.e., "Copy only when installing") and disabling
           // deployment postprocessing (it's enabled by default for release builds).
-          PBXCopyFilesBuildPhase copyFiles =
-              new PBXCopyFilesBuildPhase(
-                  CopyFilePhaseDestinationSpec.of(PBXCopyFilesBuildPhase.Destination.PRODUCTS));
-          copyFiles.setRunOnlyForDeploymentPostprocessing(Optional.of(Boolean.TRUE));
-          copyFiles.setName(Optional.of("Fake Swift Dependencies (Copy Files Phase)"));
+          if (swiftBuildPhasesDependencies) {
+            shouldAddSwiftDeps = true;
+          } else {
+            PBXCopyFilesBuildPhase copyFiles =
+                new PBXCopyFilesBuildPhase(
+                    CopyFilePhaseDestinationSpec.of(PBXCopyFilesBuildPhase.Destination.PRODUCTS));
+            copyFiles.setRunOnlyForDeploymentPostprocessing(Optional.of(Boolean.TRUE));
+            copyFiles.setName(Optional.of("Fake Swift Dependencies (Copy Files Phase)"));
 
-          ImmutableSet<PBXFileReference> swiftDepsFileRefs =
-              targetNodesSetToPBXFileReference(swiftDepTargets);
-          for (PBXFileReference fileRef : swiftDepsFileRefs) {
-            PBXBuildFile buildFile = new PBXBuildFile(fileRef);
-            copyFiles.getFiles().add(buildFile);
+            ImmutableSet<PBXFileReference> swiftDepsFileRefs =
+                targetNodesSetToPBXFileReference(swiftDepTargets);
+            for (PBXFileReference fileRef : swiftDepsFileRefs) {
+              PBXBuildFile buildFile = new PBXBuildFile(fileRef);
+              copyFiles.getFiles().add(buildFile);
+            }
+
+            swiftDepsSettingsBuilder.put("DEPLOYMENT_POSTPROCESSING", "NO");
+
+            mutator.setSwiftDependenciesBuildPhase(copyFiles);
           }
-
-          swiftDepsSettingsBuilder.put("DEPLOYMENT_POSTPROCESSING", "NO");
-
-          mutator.setSwiftDependenciesBuildPhase(copyFiles);
         }
 
         if (includeFrameworks
@@ -1576,6 +1584,13 @@ public class ProjectGenerator {
     NewNativeTargetProjectMutator.Result targetBuilderResult =
         mutator.buildTargetAndAddToProject(project, isFocusedOnTarget);
     PBXNativeTarget target = targetBuilderResult.target;
+
+    if (shouldAddSwiftDeps && swiftDepTargets != null) {
+      for (TargetNode<?> swiftTargetNode : swiftDepTargets) {
+        addPBXTargetDependency(target, swiftTargetNode.getBuildTarget());
+      }
+    }
+
     Optional<PBXGroup> targetGroup = targetBuilderResult.targetGroup;
 
     extraSettingsBuilder.putAll(swiftDepsSettingsBuilder.build());

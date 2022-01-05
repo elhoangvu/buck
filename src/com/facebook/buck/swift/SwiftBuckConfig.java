@@ -35,6 +35,7 @@ public class SwiftBuckConfig implements ConfigView<BuckConfig> {
   public static final String COPY_STDLIB_TO_FRAMEWORKS = "copy_stdlib_to_frameworks";
   public static final String USE_LIPO_THIN = "use_lipo_thin";
   public static final String EMIT_SWIFTDOCS = "emit_swiftdocs";
+  public static final String BUILD_PHASES_DEPENDENCIES = "build_phases_dependencies";
   private final BuckConfig delegate;
 
   @Override
@@ -124,5 +125,13 @@ public class SwiftBuckConfig implements ConfigView<BuckConfig> {
    */
   public boolean getEmitSwiftdocs() {
     return delegate.getBooleanValue(SECTION_NAME, EMIT_SWIFTDOCS, false);
+  }
+
+  /**
+   * If enabled, a module depending on another swift module will add the swift module to 
+   * Build Phases' Dependencies instead of Copy Files Phase
+   */
+  public boolean getBuildPhasesDependencies() {
+    return delegate.getBooleanValue(SECTION_NAME, BUILD_PHASES_DEPENDENCIES, false);
   }
 }
