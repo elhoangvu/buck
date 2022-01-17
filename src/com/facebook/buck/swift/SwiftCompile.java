@@ -113,6 +113,7 @@ public class SwiftCompile extends AbstractBuildRule implements SupportsInputBase
 
   @AddToRuleKey private final boolean enableObjcInterop;
   @AddToRuleKey private final Optional<SourcePath> bridgingHeader;
+  @AddToRuleKey private final Optional<String> groupName;
 
   @AddToRuleKey private final Preprocessor cPreprocessor;
 
@@ -139,6 +140,7 @@ public class SwiftCompile extends AbstractBuildRule implements SupportsInputBase
       ImmutableList<Arg> compilerFlags,
       Optional<Boolean> enableObjcInterop,
       Optional<SourcePath> bridgingHeader,
+      Optional<String> groupName,
       Preprocessor preprocessor,
       PreprocessorFlags cxxDeps,
       boolean importUnderlyingModule) {
@@ -185,6 +187,7 @@ public class SwiftCompile extends AbstractBuildRule implements SupportsInputBase
             .build();
     this.enableObjcInterop = enableObjcInterop.orElse(true);
     this.bridgingHeader = bridgingHeader;
+    this.groupName = groupName;
     this.cPreprocessor = preprocessor;
     this.cxxDeps = cxxDeps;
     this.depsSupplier = BuildableSupport.buildDepsSupplier(this, graphBuilder);

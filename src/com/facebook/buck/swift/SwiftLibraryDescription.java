@@ -311,6 +311,7 @@ public class SwiftLibraryDescription
               .toImmutableList(),
           args.getEnableObjcInterop(),
           args.getBridgingHeader(),
+          args.getGroupName(),
           preprocessor,
           cxxDeps,
           false);
@@ -327,6 +328,7 @@ public class SwiftLibraryDescription
         ImmutableSet.of(),
         swiftPlatformFlavorDomain,
         args.getBridgingHeader(),
+        args.getGroupName(),
         args.getFrameworks(),
         args.getLibraries(),
         args.getSupportedPlatformsRegex(),
@@ -482,6 +484,7 @@ public class SwiftLibraryDescription
             .toImmutableList(),
         args.getEnableObjcInterop(),
         args.getBridgingHeader(),
+        args.getGroupName(),
         preprocessor,
         preprocessFlags,
         importUnderlyingModule);
@@ -533,6 +536,8 @@ public class SwiftLibraryDescription
     Optional<String> getSoname();
 
     Optional<SourcePath> getBridgingHeader();
+
+    Optional<String> getGroupName();
 
     Optional<NativeLinkableGroup.Linkage> getPreferredLinkage();
 

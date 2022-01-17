@@ -83,7 +83,8 @@ public class SwiftDescriptions {
         args.getModuleName().map(Optional::of).orElse(Optional.of(buildTarget.getShortName())));
     output.setEnableObjcInterop(true);
     output.setBridgingHeader(args.getBridgingHeader());
-
+    output.setGroupName(args.getGroupName());
+    
     boolean isCompanionTarget = buildTarget.getFlavors().contains(SWIFT_COMPANION_FLAVOR);
     output.setPreferredLinkage(
         isCompanionTarget ? Optional.of(STATIC) : args.getPreferredLinkage());
