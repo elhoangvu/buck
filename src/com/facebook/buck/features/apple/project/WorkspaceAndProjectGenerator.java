@@ -569,8 +569,11 @@ public class WorkspaceAndProjectGenerator {
         String projectName;
         Path projectDirectoryName = projectDirectory.getFileName();
         if (projectDirectoryName == null || projectDirectoryName.toString().equals("")) {
-          // If we're generating a project in the root directory, use a generic name.
-          projectName = "Project";
+          projectName = workspaceArguments.getSrcTarget().get().getShortName();
+          if (projectName.length() == 0) {
+            // If we're generating a project in the root directory, use a generic name.
+            projectName = "Project";
+          }
         } else {
           // Otherwise, name the project the same thing as the directory we're in.
           projectName = projectDirectoryName.toString();
