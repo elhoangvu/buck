@@ -77,6 +77,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -88,6 +89,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import com.facebook.buck.apple.AppleLibraryDescription;
+import com.facebook.buck.apple.AppleLibraryDescriptionArg;
 
 public class WorkspaceAndProjectGenerator {
   private static final Logger LOG = Logger.get(WorkspaceAndProjectGenerator.class);
@@ -448,10 +451,19 @@ public class WorkspaceAndProjectGenerator {
       throws IOException, InterruptedException {
     ImmutableMultimap.Builder<Cell, BuildTarget> projectCellToBuildTargetsBuilder =
         ImmutableMultimap.builder();
+
+    Map<BuildTarget, String> groupBuilder = new HashMap<BuildTarget, String>();
     for (TargetNode<?> targetNode : projectGraph.getNodes()) {
       BuildTarget buildTarget = targetNode.getBuildTarget();
       projectCellToBuildTargetsBuilder.put(rootCell.getCell(buildTarget.getCell()), buildTarget);
+      if (targetNode.getDescription() instanceof AppleLibraryDescription) {
+        AppleLibraryDescriptionArg args = (AppleLibraryDescriptionArg)targetNode.getConstructorArg();
+        if (args.getGroupName().isPresent()) {
+          groupBuilder.put(buildTarget, args.getGroupName().get());
+        }
+      }
     }
+
     ImmutableMultimap<Cell, BuildTarget> projectCellToBuildTargets =
         projectCellToBuildTargetsBuilder.build();
     List<ListenableFuture<GenerationResult>> projectGeneratorFutures = new ArrayList<>();
@@ -461,11 +473,28 @@ public class WorkspaceAndProjectGenerator {
       ImmutableSet<BuildTarget> cellRules =
           ImmutableSet.copyOf(projectCellToBuildTargets.get(projectCell));
       for (BuildTarget buildTarget : cellRules) {
+        String path = buildTarget
+                        .getCellRelativeBasePath()
+                        .getPath()
+                        .toPath(rootCell.getFilesystem().getFileSystem()).toString();
+        String resolvedPath;
+        String group = groupBuilder.get(buildTarget);
+        if (group != null && group.length() > 0) {
+          boolean groupForwardSlash = group.endsWith("/");
+          boolean pathForwardSlash = path.startsWith("/");
+          if (groupForwardSlash && pathForwardSlash) {
+            resolvedPath = group + path.substring(1);
+          } else if (groupForwardSlash || pathForwardSlash) {
+            resolvedPath = group + path;
+          } else {
+            resolvedPath = group + "/" + path;
+          }
+        } else {
+          resolvedPath = path;
+        }
+
         projectDirectoryToBuildTargetsBuilder.put(
-            buildTarget
-                .getCellRelativeBasePath()
-                .getPath()
-                .toPath(rootCell.getFilesystem().getFileSystem()),
+            Paths.get(resolvedPath),
             buildTarget);
       }
       ImmutableMultimap<Path, BuildTarget> projectDirectoryToBuildTargets =

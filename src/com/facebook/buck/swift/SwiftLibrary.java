@@ -76,6 +76,7 @@ class SwiftLibrary extends NoopBuildRuleWithDeclaredAndExtraDeps
 
   private final Collection<? extends BuildRule> exportedDeps;
   private final Optional<SourcePath> bridgingHeader;
+  private final Optional<String> groupName;
   private final ImmutableSet<FrameworkPath> frameworks;
   private final ImmutableSet<FrameworkPath> libraries;
   private final FlavorDomain<UnresolvedSwiftPlatform> swiftPlatformFlavorDomain;
@@ -90,6 +91,7 @@ class SwiftLibrary extends NoopBuildRuleWithDeclaredAndExtraDeps
       Collection<? extends BuildRule> exportedDeps,
       FlavorDomain<UnresolvedSwiftPlatform> swiftPlatformFlavorDomain,
       Optional<SourcePath> bridgingHeader,
+      Optional<String> groupName,
       ImmutableSet<FrameworkPath> frameworks,
       ImmutableSet<FrameworkPath> libraries,
       Optional<Pattern> supportedPlatformsRegex,
@@ -98,11 +100,16 @@ class SwiftLibrary extends NoopBuildRuleWithDeclaredAndExtraDeps
     this.graphBuilder = graphBuilder;
     this.exportedDeps = exportedDeps;
     this.bridgingHeader = bridgingHeader;
+    this.groupName = groupName;
     this.frameworks = frameworks;
     this.libraries = libraries;
     this.swiftPlatformFlavorDomain = swiftPlatformFlavorDomain;
     this.supportedPlatformsRegex = supportedPlatformsRegex;
     this.linkage = linkage;
+  }
+
+  public Optional<String> getGroupName() {
+    return groupName;
   }
 
   private boolean isPlatformSupported(CxxPlatform cxxPlatform) {

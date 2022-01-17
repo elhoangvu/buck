@@ -489,6 +489,8 @@ public class CxxLibraryDescription
 
     Optional<String> getModuleName();
 
+    Optional<String> getGroupName();
+
     /**
      * A list of include directories to be added to the compile command for compiling this cxx
      * target and every target that depends on it.
