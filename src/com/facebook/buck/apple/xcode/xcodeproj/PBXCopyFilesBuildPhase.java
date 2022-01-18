@@ -47,6 +47,39 @@ public class PBXCopyFilesBuildPhase extends PBXBuildPhase {
     Destination(int value) {
       this.value = value;
     }
+
+    public static Destination fromString(String value) {
+      switch (value.toLowerCase()) {
+        case "absolute":
+          return ABSOLUTE;
+        case "wrapper":
+          return WRAPPER;
+        case "executables":
+          return EXECUTABLES;
+        case "resources":
+          return RESOURCES;
+        case "appclips":
+          return APPCLIPS;
+        case "frameworks":
+          return FRAMEWORKS;
+        case "shared_frameworks":
+          return SHARED_FRAMEWORKS;
+        case "shared_support":
+          return SHARED_SUPPORT;
+        case "plugins":
+          return PLUGINS;
+        case "java_resources":
+          return JAVA_RESOURCES;
+        case "products":
+          return PRODUCTS;
+        case "xpc":
+          return XPC;
+        case "qlgenerator":
+          return QLGENERATOR;
+        default:
+          throw new IllegalArgumentException("No enum specified for string: " + value);
+      }
+    }
   }
 
   /** Spec for the destination folder. */
