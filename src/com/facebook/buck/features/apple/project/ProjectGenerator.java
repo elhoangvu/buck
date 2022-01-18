@@ -1496,9 +1496,13 @@ public class ProjectGenerator {
           // To be on the safe side, we're explicitly marking the copy phase as only running for
           // deployment postprocessing (i.e., "Copy only when installing") and disabling
           // deployment postprocessing (it's enabled by default for release builds).
+          Optional<String> copyPhaseDestinationType = swiftBuckConfig.getCopyPhaseDestinationType();
           PBXCopyFilesBuildPhase copyFiles =
               new PBXCopyFilesBuildPhase(
-                  CopyFilePhaseDestinationSpec.of(PBXCopyFilesBuildPhase.Destination.PRODUCTS));
+                  CopyFilePhaseDestinationSpec
+                  .of(PBXCopyFilesBuildPhase.Destination
+                      .fromString(copyPhaseDestinationType.isPresent() ? copyPhaseDestinationType.get() : "products"), 
+                                  swiftBuckConfig.getCopyPhaseDestinationPath()));
           copyFiles.setRunOnlyForDeploymentPostprocessing(Optional.of(Boolean.TRUE));
           copyFiles.setName(Optional.of("Fake Swift Dependencies (Copy Files Phase)"));
 

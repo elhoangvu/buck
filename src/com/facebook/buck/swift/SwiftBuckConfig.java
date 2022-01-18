@@ -35,6 +35,8 @@ public class SwiftBuckConfig implements ConfigView<BuckConfig> {
   public static final String COPY_STDLIB_TO_FRAMEWORKS = "copy_stdlib_to_frameworks";
   public static final String USE_LIPO_THIN = "use_lipo_thin";
   public static final String EMIT_SWIFTDOCS = "emit_swiftdocs";
+  public static final String COPY_PHASE_DESTINATION_TYPE = "copy_phase_destination_type";
+  public static final String COPY_PHASE_DESTINATION_PATH = "copy_phase_destination_path";
   private final BuckConfig delegate;
 
   @Override
@@ -124,5 +126,13 @@ public class SwiftBuckConfig implements ConfigView<BuckConfig> {
    */
   public boolean getEmitSwiftdocs() {
     return delegate.getBooleanValue(SECTION_NAME, EMIT_SWIFTDOCS, false);
+  }
+
+  public Optional<String> getCopyPhaseDestinationType() {
+    return delegate.getValue(SECTION_NAME, COPY_PHASE_DESTINATION_TYPE);
+  }
+
+  public Optional<String> getCopyPhaseDestinationPath() {
+    return delegate.getValue(SECTION_NAME, COPY_PHASE_DESTINATION_PATH);
   }
 }
