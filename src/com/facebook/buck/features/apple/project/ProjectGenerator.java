@@ -1628,9 +1628,10 @@ public class ProjectGenerator {
       }
 
       // -- configurations
+      String srcRoot = projectFilesystem.getRootPath().normalize().toString();
       extraSettingsBuilder
           .put("TARGET_NAME", buildTargetName)
-          .put("SRCROOT", pathRelativizer.outputPathToBuildTargetPath(buildTarget).toString());
+          .put("SRCROOT", srcRoot);
       if ((productType == ProductTypes.UI_TEST || productType == ProductTypes.UNIT_TEST) && isFocusedOnTarget) {
         if (bundleLoaderNode.isPresent()) {
           BuildTarget testTarget = bundleLoaderNode.get().getBuildTarget();
@@ -1719,12 +1720,10 @@ public class ProjectGenerator {
         extraSettingsBuilder.put("INFOPLIST_FILE", infoPlistPath.toString());
       }
       if (arg.getBridgingHeader().isPresent()) {
-        Path bridgingHeaderPath =
-            pathRelativizer.outputDirToRootRelative(
-                resolveSourcePath(arg.getBridgingHeader().get()).getPath());
+        String bridgingHeaderPath = resolveSourcePath(arg.getBridgingHeader().get()).toString();
         extraSettingsBuilder.put(
             "SWIFT_OBJC_BRIDGING_HEADER",
-            Joiner.on('/').join("$(SRCROOT)", bridgingHeaderPath.toString()));
+            Joiner.on('/').join("$(SRCROOT)", bridgingHeaderPath));
       }
 
       swiftVersion.ifPresent(s -> extraSettingsBuilder.put("SWIFT_VERSION", s));
@@ -1755,9 +1754,7 @@ public class ProjectGenerator {
           getPrefixHeaderSourcePath(targetNode.getConstructorArg());
       if (prefixHeaderOptional.isPresent()) {
         RelPath prefixHeaderRelative = resolveSourcePath(prefixHeaderOptional.get());
-        Path prefixHeaderPath =
-            pathRelativizer.outputDirToRootRelative(prefixHeaderRelative.getPath());
-        extraSettingsBuilder.put("GCC_PREFIX_HEADER", prefixHeaderPath.toString());
+        extraSettingsBuilder.put("GCC_PREFIX_HEADER", Joiner.on('/').join("$(SRCROOT)", prefixHeaderRelative.toString()));
         extraSettingsBuilder.put("GCC_PRECOMPILE_PREFIX_HEADER", "YES");
       }
 
