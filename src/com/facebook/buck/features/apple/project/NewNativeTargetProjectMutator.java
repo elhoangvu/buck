@@ -61,6 +61,8 @@ import com.facebook.buck.cxx.toolchain.HeaderVisibility;
 import com.facebook.buck.features.apple.common.CopyInXcode;
 import com.facebook.buck.features.js.JsBundleOutputs;
 import com.facebook.buck.features.js.JsBundleOutputsDescription;
+import com.facebook.buck.io.file.MorePaths;
+import com.facebook.buck.io.filesystem.ProjectFilesystem;
 import com.facebook.buck.rules.coercer.FrameworkPath;
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
@@ -108,6 +110,7 @@ class NewNativeTargetProjectMutator {
   private final PathRelativizer pathRelativizer;
   private final Function<SourcePath, Path> sourcePathResolver;
 
+  private final Path originalPath;
   private ProductType productType = ProductTypes.BUNDLE;
   private Path productOutputPath = Paths.get("");
   private String productName = "";
@@ -138,9 +141,12 @@ class NewNativeTargetProjectMutator {
   private Optional<PBXBuildPhase> swiftDependenciesBuildPhase = Optional.empty();
 
   public NewNativeTargetProjectMutator(
-      PathRelativizer pathRelativizer, Function<SourcePath, Path> sourcePathResolver) {
+      PathRelativizer pathRelativizer, 
+      Function<SourcePath, Path> sourcePathResolver,
+      Path originalPath) {
     this.pathRelativizer = pathRelativizer;
     this.sourcePathResolver = sourcePathResolver;
+    this.originalPath = originalPath;
   }
 
   /**
@@ -300,7 +306,9 @@ class NewNativeTargetProjectMutator {
     return this;
   }
 
-  public Result buildTargetAndAddToProject(PBXProject project, boolean addBuildPhases) {
+  public Result buildTargetAndAddToProject(PBXProject project, 
+                                          boolean addBuildPhases, 
+                                          ProjectFilesystem fileSystem) {
     PBXNativeTarget target =
         new PBXNativeTarget(targetName, AbstractPBXObjectFactory.DefaultFactory());
 
@@ -312,7 +320,7 @@ class NewNativeTargetProjectMutator {
 
       // Phases
       addRunScriptBuildPhases(target, preBuildRunScriptPhases);
-      addPhasesAndGroupsForSources(target, targetGroup);
+      addPhasesAndGroupsForSources(target, targetGroup, fileSystem);
       addFrameworksBuildPhase(project, target);
       addResourcesFileReference(targetGroup);
       addCopyResourcesToNonStdDestinationPhases(target, targetGroup);
@@ -341,8 +349,19 @@ class NewNativeTargetProjectMutator {
     return new Result(target, optTargetGroup);
   }
 
-  private void addPhasesAndGroupsForSources(PBXNativeTarget target, PBXGroup targetGroup) {
-    PBXGroup sourcesGroup = targetGroup.getOrCreateChildGroupByName("Sources");
+  private void addPhasesAndGroupsForSources(PBXNativeTarget target,
+                                            PBXGroup targetGroup, 
+                                            ProjectFilesystem fileSystem) {
+    String sourcesDir = "Sources";
+    PBXGroup sourcesGroup = targetGroup.getOrCreateChildGroupByName(sourcesDir);
+    Path originalPath = Paths.get(this.originalPath.toString(), targetGroup.getName(), sourcesDir);
+
+    if (fileSystem.exists(originalPath)) {
+      Path relativePath = pathRelativizer.outputDirToRootRelative(originalPath);
+      sourcesGroup.setSourceTree(PBXReference.SourceTree.SOURCE_ROOT);
+      sourcesGroup.setPath(relativePath.toString());
+    }
+
     // Sources groups stay in the order in which they're declared in the BUCK file.
     sourcesGroup.setSortPolicy(PBXGroup.SortPolicy.UNSORTED);
     PBXSourcesBuildPhase sourcesBuildPhase = new PBXSourcesBuildPhase();
@@ -377,7 +396,7 @@ class NewNativeTargetProjectMutator {
               Optional.empty());
       sourcesGroup.getOrCreateFileReferenceBySourceTreePath(infoPlistSourceTreePath);
     }
-
+    
     if (bridgingHeader.isPresent()) {
       SourceTreePath bridgingHeaderSourceTreePath =
           new SourceTreePath(

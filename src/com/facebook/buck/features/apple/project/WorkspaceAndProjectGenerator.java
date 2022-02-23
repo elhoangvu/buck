@@ -467,6 +467,7 @@ public class WorkspaceAndProjectGenerator {
     ImmutableMultimap<Cell, BuildTarget> projectCellToBuildTargets =
         projectCellToBuildTargetsBuilder.build();
     List<ListenableFuture<GenerationResult>> projectGeneratorFutures = new ArrayList<>();
+    Map<String, String> originalPaths = new HashMap<String, String>();
     for (Cell projectCell : projectCellToBuildTargets.keySet()) {
       ImmutableMultimap.Builder<Path, BuildTarget> projectDirectoryToBuildTargetsBuilder =
           ImmutableMultimap.builder();
@@ -480,19 +481,12 @@ public class WorkspaceAndProjectGenerator {
         String resolvedPath;
         String group = groupBuilder.get(buildTarget);
         if (group != null && group.length() > 0) {
-          boolean groupForwardSlash = group.endsWith("/");
-          boolean pathForwardSlash = path.startsWith("/");
-          if (groupForwardSlash && pathForwardSlash) {
-            resolvedPath = group + path.substring(1);
-          } else if (groupForwardSlash || pathForwardSlash) {
-            resolvedPath = group + path;
-          } else {
-            resolvedPath = group + "/" + path;
-          }
+          resolvedPath = Paths.get(group, path).toString();
         } else {
           resolvedPath = path;
         }
 
+        originalPaths.put(resolvedPath, path);
         projectDirectoryToBuildTargetsBuilder.put(
             Paths.get(resolvedPath),
             buildTarget);
@@ -512,6 +506,7 @@ public class WorkspaceAndProjectGenerator {
         boolean isMainProject =
             workspaceArguments.getSrcTarget().isPresent()
                 && rules.contains(workspaceArguments.getSrcTarget().get());
+        Path originalPath = Paths.get(originalPaths.get(projectDirectory.toString()));
         projectGeneratorFutures.add(
             listeningExecutorService.submit(
                 () -> {
@@ -520,6 +515,7 @@ public class WorkspaceAndProjectGenerator {
                           projectGenerators,
                           projectCell,
                           projectDirectory,
+                          originalPath,
                           rules,
                           isMainProject,
                           targetsInRequiredProjects);
@@ -582,6 +578,7 @@ public class WorkspaceAndProjectGenerator {
       Map<Path, ProjectGenerator> projectGenerators,
       Cell projectCell,
       Path projectDirectory,
+      Path originalPath,
       ImmutableSet<BuildTarget> rules,
       boolean isMainProject,
       ImmutableSet<BuildTarget> targetsInRequiredProjects)
@@ -617,6 +614,7 @@ public class WorkspaceAndProjectGenerator {
                 rules,
                 projectCell,
                 projectDirectory,
+                originalPath,
                 projectName,
                 buildFileName,
                 projectGeneratorOptions,
@@ -681,6 +679,7 @@ public class WorkspaceAndProjectGenerator {
             targetsInRequiredProjects,
             rootCell,
             outputDirectory.getParent(),
+            Paths.get(""),
             workspaceName,
             buildFileName,
             projectGeneratorOptions,
