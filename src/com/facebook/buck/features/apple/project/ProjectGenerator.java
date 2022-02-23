@@ -258,6 +258,7 @@ public class ProjectGenerator {
   private final Cell projectCell;
   private final ProjectFilesystem projectFilesystem;
   private final Path outputDirectory;
+  private final Path originalPath;
   private final String projectName;
   private final ImmutableSet<BuildTarget> initialTargets;
   private final Path projectPath;
@@ -318,6 +319,7 @@ public class ProjectGenerator {
       Set<BuildTarget> initialTargets,
       Cell cell,
       Path outputDirectory,
+      Path originalPath,
       String projectName,
       String buildFileName,
       ProjectGeneratorOptions options,
@@ -343,6 +345,7 @@ public class ProjectGenerator {
     this.projectCell = cell;
     this.projectFilesystem = cell.getFilesystem();
     this.outputDirectory = outputDirectory;
+    this.originalPath = originalPath;
     this.projectName = projectName;
     this.buildFileName = buildFileName;
     this.options = options;
@@ -710,14 +713,16 @@ public class ProjectGenerator {
 
     NewNativeTargetProjectMutator mutator =
         new NewNativeTargetProjectMutator(
-            pathRelativizer, sourcePath -> resolveSourcePath(sourcePath).getPath());
+            pathRelativizer, 
+            sourcePath -> resolveSourcePath(sourcePath).getPath(), 
+            originalPath);
     mutator
         .setTargetName(getXcodeTargetName(buildTarget))
         .setProduct(ProductTypes.STATIC_LIBRARY, productName, outputPath)
         .setPreBuildRunScriptPhases(ImmutableList.of(scriptPhase));
 
     NewNativeTargetProjectMutator.Result targetBuilderResult;
-    targetBuilderResult = mutator.buildTargetAndAddToProject(project, isFocusedOnTarget);
+    targetBuilderResult = mutator.buildTargetAndAddToProject(project, isFocusedOnTarget, projectFilesystem);
 
     BuildTarget compilerTarget =
         HalideLibraryDescription.createHalideCompilerBuildTarget(buildTarget);
@@ -1304,7 +1309,9 @@ public class ProjectGenerator {
     CxxLibraryDescription.CommonArg arg = targetNode.getConstructorArg();
     NewNativeTargetProjectMutator mutator =
         new NewNativeTargetProjectMutator(
-            pathRelativizer, sourcePath -> resolveSourcePath(sourcePath).getPath());
+            pathRelativizer, 
+            sourcePath -> resolveSourcePath(sourcePath).getPath(),
+            originalPath);
 
     // Both exported headers and exported platform headers will be put into the symlink tree
     // exported platform headers will be excluded and then included by platform
@@ -1578,7 +1585,7 @@ public class ProjectGenerator {
     }
 
     NewNativeTargetProjectMutator.Result targetBuilderResult =
-        mutator.buildTargetAndAddToProject(project, isFocusedOnTarget);
+        mutator.buildTargetAndAddToProject(project, isFocusedOnTarget, projectFilesystem);
     PBXNativeTarget target = targetBuilderResult.target;
     Optional<PBXGroup> targetGroup = targetBuilderResult.targetGroup;
 
