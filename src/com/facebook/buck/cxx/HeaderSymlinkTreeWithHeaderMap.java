@@ -32,6 +32,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 public final class HeaderSymlinkTreeWithHeaderMap extends HeaderSymlinkTree {
@@ -81,6 +82,27 @@ public final class HeaderSymlinkTreeWithHeaderMap extends HeaderSymlinkTree {
       // aligning in order to get this to work. May we find peace in another life.
       headerMapEntries.put(key, buckOut.relativize(getRoot().resolve(key)));
     }
+
+    // A cheat to add Swift ObjC generated header to hmap
+    //
+    // The header (*-Swift.h) is generated when compiling swift sources.
+    // It's header file location is in `#iphoneos-arm64,swift-compile` 
+    // or `#iphoneos-armv7,swift-compile` is a doubting location.
+    // Of course, this header is not found from the hmap is crawled 
+    // from a `#header-mode-symlink-tree-with-header-map,headers` folder
+    //
+    // The cheat tries to add the generated header (*-Swift.h) to the hmap
+    // don't care it existed or not
+    String targetName = getBuildTarget().getShortName();
+    String swiftHeader = targetName + "-Swift.h";
+    String dummyFlavors = "iphoneos-arm64,swift-compile";
+    Path root = getRoot();
+    Path compilePath = root.resolve("..")
+                           .resolve(targetName + "#" + dummyFlavors)
+                           .resolve(swiftHeader);
+    Path swiftHeaderPath = buckOut.relativize(compilePath);
+    headerMapEntries.put(Paths.get(targetName, swiftHeader), swiftHeaderPath);
+
     ImmutableList.Builder<Step> builder =
         ImmutableList.<Step>builder()
             .addAll(super.getBuildSteps(context, buildableContext))
