@@ -32,6 +32,8 @@ public class PBXShellScriptBuildPhase extends PBXBuildPhase {
   @Nullable private String shellPath;
   @Nullable private String shellScript;
 
+  private Boolean showEnvVarsInLog = false;
+
   private static final NSString DEFAULT_SHELL_PATH = new NSString("/bin/sh");
   private static final NSString DEFAULT_SHELL_SCRIPT = new NSString("");
 
@@ -129,6 +131,8 @@ public class PBXShellScriptBuildPhase extends PBXBuildPhase {
       shellScriptString = new NSString(shellScript);
     }
     s.addField("shellScript", shellScriptString);
+
+    s.addField("showEnvVarsInLog", showEnvVarsInLog ? 1 : 0);
   }
 
   /** Converts List of Strings into NSArray of NSStrings */
