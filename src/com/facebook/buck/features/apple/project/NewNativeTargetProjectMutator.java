@@ -826,6 +826,7 @@ class NewNativeTargetProjectMutator {
         shellScriptBuildPhase.getOutputPaths().addAll(arg.getOutputs());
         shellScriptBuildPhase.getOutputFileListPaths().addAll(arg.getOutputFileLists());
         shellScriptBuildPhase.setShellScript(arg.getCmd());
+        shellScriptBuildPhase.setName(Optional.of(arg.getName()));
       } else if (node.getDescription() instanceof JsBundleOutputsDescription) {
         shellScriptBuildPhase.setShellScript(
             generateXcodeShellScriptForJsBundle(node, buildRuleResolverForNode));
