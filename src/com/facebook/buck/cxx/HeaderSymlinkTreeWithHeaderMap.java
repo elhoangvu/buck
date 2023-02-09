@@ -15,11 +15,13 @@
  */
 
 package com.facebook.buck.cxx;
-
+import com.facebook.buck.core.exceptions.HumanReadableException;
 import com.facebook.buck.core.build.buildable.context.BuildableContext;
 import com.facebook.buck.core.build.context.BuildContext;
 import com.facebook.buck.core.model.BuildTarget;
 import com.facebook.buck.core.model.impl.BuildTargetPaths;
+import com.facebook.buck.core.model.Flavor;
+import com.facebook.buck.core.model.InternalFlavor;
 import com.facebook.buck.core.rulekey.AddToRuleKey;
 import com.facebook.buck.core.sourcepath.ExplicitBuildTargetSourcePath;
 import com.facebook.buck.core.sourcepath.PathSourcePath;
@@ -31,13 +33,18 @@ import com.facebook.buck.step.Step;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.Set;
 
 public final class HeaderSymlinkTreeWithHeaderMap extends HeaderSymlinkTree {
 
   private static final Logger LOG = Logger.get(HeaderSymlinkTreeWithHeaderMap.class);
+
+  public  static final Flavor ARCH_ARM64_FLAVOR = InternalFlavor.of("iphoneos-arm64");
+  public static final Flavor SWIFT_COMPILE_FLAVOR = InternalFlavor.of("swift-compile");
 
   @AddToRuleKey(stringify = true)
   private final Path headerMapPath;
@@ -95,13 +102,20 @@ public final class HeaderSymlinkTreeWithHeaderMap extends HeaderSymlinkTree {
     // don't care it existed or not
     String targetName = getBuildTarget().getShortName();
     String swiftHeader = targetName + "-Swift.h";
-    String dummyFlavors = "iphoneos-arm64,swift-compile";
-    Path root = getRoot();
-    Path compilePath = root.resolve("..")
-                           .resolve(targetName + "#" + dummyFlavors)
-                           .resolve(swiftHeader);
-    Path swiftHeaderPath = buckOut.relativize(compilePath);
-    headerMapEntries.put(Paths.get(targetName, swiftHeader), swiftHeaderPath);
+    ProjectFilesystem fileSystem = getProjectFilesystem();
+    Path swiftHeaderPath = getHeaderSymlinkTreePath(
+                              fileSystem, 
+                              getBuildTarget().withoutFlavors(), 
+                              ARCH_ARM64_FLAVOR, 
+                              SWIFT_COMPILE_FLAVOR
+                          )
+                          .resolve(swiftHeader);
+    Path relSwiftHeaderPath = fileSystem
+                                  .getBuckPaths()
+                                  .getBuckOut()
+                                  .relativize(swiftHeaderPath);
+                                  
+    headerMapEntries.put(Paths.get(targetName, swiftHeader), relSwiftHeaderPath);
 
     ImmutableList.Builder<Step> builder =
         ImmutableList.<Step>builder()
@@ -113,6 +127,22 @@ public final class HeaderSymlinkTreeWithHeaderMap extends HeaderSymlinkTree {
                     headerMapEntries.build(),
                     buildableContext));
     return builder.build();
+  }
+
+  public static BuildTarget createHeaderSymlinkTreeTarget(
+      BuildTarget target, Flavor... flavors) {
+    return target.withAppendedFlavors(
+        ImmutableSet.<Flavor>builder()
+            .add(flavors)
+            .build());
+  }
+
+  public static Path getHeaderSymlinkTreePath(
+      ProjectFilesystem filesystem,
+      BuildTarget target,
+      Flavor... flavors) {
+    return BuildTargetPaths.getGenPath(
+        filesystem, createHeaderSymlinkTreeTarget(target, flavors), "%s");
   }
 
   @Override
