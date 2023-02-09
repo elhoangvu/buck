@@ -125,6 +125,7 @@ public class CxxDescriptionEnhancer {
       InternalFlavor.of("shared-library-symlink-tree");
   public static final Flavor BINARY_WITH_SHARED_LIBRARIES_SYMLINK_TREE_FLAVOR =
       InternalFlavor.of("binary-with-shared-libraries-symlink-tree");
+  public static final Flavor HEADER_MODE_SYMLINK_TREE_WITH_HEADER_MAP = InternalFlavor.of("header-mode-symlink-tree-with-header-map");
 
   public static final Flavor CXX_LINK_BINARY_FLAVOR = InternalFlavor.of("binary");
   public static final Flavor CXX_LINK_THININDEX_FLAVOR = InternalFlavor.of("thinindex");
