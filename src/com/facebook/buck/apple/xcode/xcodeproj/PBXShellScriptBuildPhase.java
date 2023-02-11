@@ -131,8 +131,7 @@ public class PBXShellScriptBuildPhase extends PBXBuildPhase {
       shellScriptString = new NSString(shellScript);
     }
     s.addField("shellScript", shellScriptString);
-
-    s.addField("showEnvVarsInLog", showEnvVarsInLog ? 1 : 0);
+    s.addField("showEnvVarsInLog", showEnvVarsInLog);
   }
 
   /** Converts List of Strings into NSArray of NSStrings */
