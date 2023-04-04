@@ -133,8 +133,20 @@ public class AppleSdkDiscovery {
               }
 
               AppleSdk.Builder sdkBuilder = AppleSdk.builder();
-              if (buildSdkFromPath(
-                  sdkDir, sdkBuilder, xcodeToolchains, defaultToolchain, appleConfig)) {
+              Boolean built = false;
+              try {
+                built = buildSdkFromPath(
+                  sdkDir, 
+                  sdkBuilder, 
+                  xcodeToolchains,
+                  defaultToolchain,
+                  appleConfig
+                );
+              } catch (Exception e) {
+                built = false;
+              }
+
+              if (built) {
                 AppleSdk sdk = sdkBuilder.build();
                 LOG.debug("Found SDK %s", sdk);
 
