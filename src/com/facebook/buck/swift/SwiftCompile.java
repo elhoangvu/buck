@@ -431,14 +431,6 @@ public class SwiftCompile extends AbstractBuildRule implements SupportsInputBase
                 flavor);
         args.add(INCLUDE_FLAG.concat(headerPath.toString()));
       }
-
-      Path headerPath = 
-          CxxDescriptionEnhancer.getHeaderSymlinkTreePath(
-              getProjectFilesystem(),
-              getBuildTarget().withFlavors(),
-              HeaderVisibility.PUBLIC,
-              CxxDescriptionEnhancer.HEADER_MODE_SYMLINK_TREE_WITH_HEADER_MAP);
-        args.add(INCLUDE_FLAG.concat(headerPath.toString()));
     }
 
     return args.build();
