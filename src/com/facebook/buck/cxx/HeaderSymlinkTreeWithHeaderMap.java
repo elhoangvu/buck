@@ -35,7 +35,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.Set;
 
@@ -89,34 +88,7 @@ public final class HeaderSymlinkTreeWithHeaderMap extends HeaderSymlinkTree {
       // aligning in order to get this to work. May we find peace in another life.
       headerMapEntries.put(key, buckOut.relativize(getRoot().resolve(key)));
     }
-
-    // A cheat to add Swift ObjC generated header to hmap
-    //
-    // The header (*-Swift.h) is generated when compiling swift sources.
-    // It's header file location is in `#iphoneos-arm64,swift-compile` 
-    // or `#iphoneos-armv7,swift-compile` is a doubting location.
-    // Of course, this header is not found from the hmap is crawled 
-    // from a `#header-mode-symlink-tree-with-header-map,headers` folder
-    //
-    // The cheat tries to add the generated header (*-Swift.h) to the hmap
-    // don't care it existed or not
-    String targetName = getBuildTarget().getShortName();
-    String swiftHeader = targetName + "-Swift.h";
-    ProjectFilesystem fileSystem = getProjectFilesystem();
-    Path swiftHeaderPath = getHeaderSymlinkTreePath(
-                              fileSystem, 
-                              getBuildTarget().withoutFlavors(), 
-                              ARCH_ARM64_FLAVOR, 
-                              SWIFT_COMPILE_FLAVOR
-                          )
-                          .resolve(swiftHeader);
-    Path relSwiftHeaderPath = fileSystem
-                                  .getBuckPaths()
-                                  .getBuckOut()
-                                  .relativize(swiftHeaderPath);
-                                  
-    headerMapEntries.put(Paths.get(targetName, swiftHeader), relSwiftHeaderPath);
-
+    
     ImmutableList.Builder<Step> builder =
         ImmutableList.<Step>builder()
             .addAll(super.getBuildSteps(context, buildableContext))
