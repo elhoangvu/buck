@@ -1605,6 +1605,7 @@ public class ProjectGenerator {
       publicCxxHeaders = ImmutableSortedMap.of();
     }
 
+    boolean symlinkGeneratedObjCHeader = false;
     if (!options.shouldGenerateHeaderSymlinkTreesOnly()) {
       if (isFocusedOnTarget) {
         SourceTreePath buckFilePath =
@@ -1777,10 +1778,17 @@ public class ProjectGenerator {
         // We need to be able to control the directory where Xcode places the derived sources, so
         // that the Obj-C Generated Header can be included in the header map and imported through
         // a framework-style import like <Module/Module-Swift.h>
-        Path derivedSourcesDir =
-            getDerivedSourcesDirectoryForBuildTarget(buildTarget, projectFilesystem);
-        defaultSettingsBuilder.put(
-            "DERIVED_FILE_DIR", repoRoot.resolve(derivedSourcesDir).toString());
+        
+        if (isFrameworkTarget(buildTargetNode)) {
+          defaultSettingsBuilder.put(
+              "DERIVED_FILE_DIR", "$BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH/Headers");
+        } else {
+          Path derivedSourcesDir = 
+              getDerivedSourcesDirectoryForBuildTarget(buildTarget, projectFilesystem);
+          defaultSettingsBuilder.put(
+              "DERIVED_FILE_DIR", repoRoot.resolve(derivedSourcesDir).toString());
+          symlinkGeneratedObjCHeader = true;
+        }
       }
 
       defaultSettingsBuilder.put(PRODUCT_NAME, getProductName(buildTargetNode));
@@ -2047,7 +2055,9 @@ public class ProjectGenerator {
     // -- phases
     createHeaderSymlinkTree(
         publicCxxHeaders,
-        getSwiftPublicHeaderMapEntriesForTarget(targetNode),
+        symlinkGeneratedObjCHeader 
+        ? getSwiftPublicHeaderMapEntriesForTarget(targetNode) 
+        : ImmutableMap.of(),
         moduleName,
         moduleMapMode,
         getPathToHeaderSymlinkTree(targetNode, HeaderVisibility.PUBLIC),

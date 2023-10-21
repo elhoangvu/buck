@@ -1470,11 +1470,17 @@ public class XcodeNativeTargetGenerator {
       // We need to be able to control the directory where Xcode places the derived sources, so
       // that the Obj-C Generated Header can be included in the header map and imported through
       // a framework-style import like <Module/Module-Swift.h>
-      Path derivedSourcesDir =
-          com.facebook.buck.features.apple.projectV2.Utils.getDerivedSourcesDirectoryForBuildTarget(
-              buildTarget, projectFilesystem);
-      defaultSettingsBuilder.put(
-          "DERIVED_FILE_DIR", repoRoot.resolve(derivedSourcesDir).toString());
+
+      if (isFrameworkTarget(buildTargetNode)) {
+        defaultSettingsBuilder.put(
+            "DERIVED_FILE_DIR", "$BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH/Headers");
+      } else {
+        Path derivedSourcesDir =
+            com.facebook.buck.features.apple.projectV2.Utils.getDerivedSourcesDirectoryForBuildTarget(
+                buildTarget, projectFilesystem);
+        defaultSettingsBuilder.put(
+            "DERIVED_FILE_DIR", repoRoot.resolve(derivedSourcesDir).toString());
+      }
     }
 
     defaultSettingsBuilder.put(PRODUCT_NAME, getProductName(buildTargetNode));
@@ -2075,6 +2081,15 @@ public class XcodeNativeTargetGenerator {
   private static boolean isFrameworkBundle(HasAppleBundleFields arg) {
     return arg.getExtension().isLeft()
         && arg.getExtension().getLeft().equals(AppleBundleExtension.FRAMEWORK);
+  }
+
+  private boolean isFrameworkTarget(TargetNode<?> targetNode) {
+    if (targetNode.getDescription() instanceof AppleBundleDescription
+        || targetNode.getDescription() instanceof AppleTestDescription) {
+      HasAppleBundleFields arg = (HasAppleBundleFields) targetNode.getConstructorArg();
+      return isFrameworkBundle(arg);
+    }
+    return false;
   }
 
   private Path resolveSourcePath(SourcePath sourcePath) {
