@@ -676,7 +676,8 @@ public class AppleDescriptions {
       boolean cacheStrips,
       boolean useEntitlementsWhenAdhocCodeSigning,
       Predicate<BuildTarget> filter,
-      Optional<Boolean> isAppClip) {
+      Optional<Boolean> isAppClip,
+      Optional<Boolean> copyFiles) {
     AppleCxxPlatform appleCxxPlatform =
         ApplePlatforms.getAppleCxxPlatformForBuildTarget(
             graphBuilder,
@@ -920,7 +921,8 @@ public class AppleDescriptions {
         copySwiftStdlibToFrameworks,
         useLipoThin,
         useEntitlementsWhenAdhocCodeSigning,
-        isAppClip);
+        isAppClip,
+        copyFiles);
   }
 
   /**

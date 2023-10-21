@@ -431,6 +431,7 @@ public class AppleBinaryDescription
         cxxBuckConfig.shouldCacheStrip(),
         appleConfig.useEntitlementsWhenAdhocCodeSigning(),
         Predicates.alwaysTrue(),
+        Optional.empty(),
         Optional.empty());
   }
 

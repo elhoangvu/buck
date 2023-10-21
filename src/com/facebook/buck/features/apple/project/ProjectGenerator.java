@@ -3383,6 +3383,10 @@ public class ProjectGenerator {
   private Optional<CopyFilePhaseDestinationSpec> getDestinationSpec(TargetNode<?> targetNode) {
     if (targetNode.getDescription() instanceof AppleBundleDescription) {
       AppleBundleDescriptionArg arg = (AppleBundleDescriptionArg) targetNode.getConstructorArg();
+      if (arg.getCopyFiles().isPresent() && !arg.getCopyFiles().get()) {
+        return Optional.empty();
+      }
+      
       AppleBundleExtension extension =
           arg.getExtension().isLeft() ? arg.getExtension().getLeft() : AppleBundleExtension.BUNDLE;
       switch (extension) {

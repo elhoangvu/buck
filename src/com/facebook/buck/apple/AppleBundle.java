@@ -191,6 +191,7 @@ public class AppleBundle extends AbstractBuildRule
   private final BuildRuleParams buildRuleParams;
   private BuildableSupport.DepsSupplier depsSupplier;
   private final Optional<Boolean> isAppClip;
+  private final Optional<Boolean> copyFiles;
 
   AppleBundle(
       BuildTarget buildTarget,
@@ -226,7 +227,8 @@ public class AppleBundle extends AbstractBuildRule
       boolean copySwiftStdlibToFrameworks,
       boolean useLipoThin,
       boolean useEntitlementsWhenAdhocCodeSigning,
-      Optional<Boolean> isAppClip) {
+      Optional<Boolean> isAppClip,
+      Optional<Boolean> copyFiles) {
     super(buildTarget, projectFilesystem);
     this.buildRuleParams = params;
     this.extension =
@@ -304,6 +306,7 @@ public class AppleBundle extends AbstractBuildRule
     this.useEntitlementsWhenAdhocCodeSigning = useEntitlementsWhenAdhocCodeSigning;
     this.depsSupplier = BuildableSupport.buildDepsSupplier(this, graphBuilder);
     this.isAppClip = isAppClip;
+    this.copyFiles = copyFiles;
   }
 
   public static String getBinaryName(BuildTarget buildTarget, Optional<String> productName) {
@@ -999,6 +1002,10 @@ public class AppleBundle extends AbstractBuildRule
 
   public Boolean getIsAppClip() {
     return isAppClip.orElse(false);
+  }
+
+    public Boolean getCopyFiles() {
+    return copyFiles.orElse(true);
   }
 
   @Override

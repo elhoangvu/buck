@@ -375,6 +375,7 @@ public class AppleTestDescription
                         cxxBuckConfig.shouldCacheStrip(),
                         appleConfig.useEntitlementsWhenAdhocCodeSigning(),
                         Predicates.alwaysTrue(),
+                        Optional.empty(),
                         Optional.empty())));
 
     Optional<SourcePath> xctool =

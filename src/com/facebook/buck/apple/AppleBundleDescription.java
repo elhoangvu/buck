@@ -223,7 +223,8 @@ public class AppleBundleDescription
         cxxBuckConfig.shouldCacheStrip(),
         appleConfig.useEntitlementsWhenAdhocCodeSigning(),
         resourceFilter,
-        args.getIsAppClip());
+        args.getIsAppClip(),
+        args.getCopyFiles());
   }
 
   /**
@@ -445,6 +446,8 @@ public class AppleBundleDescription
     Optional<ImmutableList<CxxLinkGroupMapping>> getResourceGroupMap();
 
     Optional<String> getResourceGroup();
+
+    Optional<Boolean> getCopyFiles();
 
     @Override
     @Hint(isDep = false)
