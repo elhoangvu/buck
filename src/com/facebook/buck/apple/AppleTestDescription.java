@@ -376,6 +376,7 @@ public class AppleTestDescription
                         appleConfig.useEntitlementsWhenAdhocCodeSigning(),
                         Predicates.alwaysTrue(),
                         Optional.empty(),
+                        Optional.empty(),
                         Optional.empty())));
 
     Optional<SourcePath> xctool =

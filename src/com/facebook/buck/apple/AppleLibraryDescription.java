@@ -469,6 +469,7 @@ public class AppleLibraryDescription
         appleConfig.useEntitlementsWhenAdhocCodeSigning(),
         Predicates.alwaysTrue(),
         Optional.empty(),
+        Optional.empty(),
         Optional.empty());
   }
 

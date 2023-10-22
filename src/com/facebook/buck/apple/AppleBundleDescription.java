@@ -224,7 +224,8 @@ public class AppleBundleDescription
         appleConfig.useEntitlementsWhenAdhocCodeSigning(),
         resourceFilter,
         args.getIsAppClip(),
-        args.getCopyFiles());
+        args.getCopyFiles(),
+        args.getGroupName());
   }
 
   /**
@@ -448,6 +449,8 @@ public class AppleBundleDescription
     Optional<String> getResourceGroup();
 
     Optional<Boolean> getCopyFiles();
+
+    Optional<String> getGroupName();
 
     @Override
     @Hint(isDep = false)

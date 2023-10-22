@@ -677,7 +677,8 @@ public class AppleDescriptions {
       boolean useEntitlementsWhenAdhocCodeSigning,
       Predicate<BuildTarget> filter,
       Optional<Boolean> isAppClip,
-      Optional<Boolean> copyFiles) {
+      Optional<Boolean> copyFiles,
+      Optional<String> groupName) {
     AppleCxxPlatform appleCxxPlatform =
         ApplePlatforms.getAppleCxxPlatformForBuildTarget(
             graphBuilder,
@@ -922,7 +923,8 @@ public class AppleDescriptions {
         useLipoThin,
         useEntitlementsWhenAdhocCodeSigning,
         isAppClip,
-        copyFiles);
+        copyFiles,
+        groupName);
   }
 
   /**

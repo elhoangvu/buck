@@ -456,11 +456,19 @@ public class WorkspaceAndProjectGenerator {
     for (TargetNode<?> targetNode : projectGraph.getNodes()) {
       BuildTarget buildTarget = targetNode.getBuildTarget();
       projectCellToBuildTargetsBuilder.put(rootCell.getCell(buildTarget.getCell()), buildTarget);
+      Optional<String> groupName = Optional.empty();
       if (targetNode.getDescription() instanceof AppleLibraryDescription) {
         AppleLibraryDescriptionArg args = (AppleLibraryDescriptionArg)targetNode.getConstructorArg();
-        if (args.getGroupName().isPresent()) {
-          groupBuilder.put(buildTarget, args.getGroupName().get());
-        }
+        groupName = args.getGroupName();
+      }
+
+      if (targetNode.getDescription() instanceof AppleBundleDescription) {
+        AppleBundleDescriptionArg args = (AppleBundleDescriptionArg)targetNode.getConstructorArg();
+        groupName = args.getGroupName();
+      }
+
+      if (groupName.isPresent()) {
+        groupBuilder.put(buildTarget, groupName.get());
       }
     }
 
