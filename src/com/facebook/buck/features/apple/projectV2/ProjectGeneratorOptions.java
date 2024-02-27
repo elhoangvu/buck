@@ -34,6 +34,12 @@ public interface ProjectGeneratorOptions {
     return false;
   }
 
+  /** Create schemes for each target's contained build and test targets. */
+  @Value.Default
+  default boolean shouldGenerateTargetSchemes() {
+    return false;
+  }
+
   /** Generate read-only project files */
   @Value.Default
   default boolean shouldGenerateReadOnlyFiles() {

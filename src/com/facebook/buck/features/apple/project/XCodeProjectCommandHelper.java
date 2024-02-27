@@ -143,6 +143,7 @@ public class XCodeProjectCommandHelper {
   private final String modulesToFocusOn;
   private final boolean combinedProject;
   private final boolean createProjectSchemes;
+  private final boolean createTargetSchemes;
   private final boolean dryRun;
   private final boolean readOnly;
   private final PathOutputPresenter outputPresenter;
@@ -179,6 +180,7 @@ public class XCodeProjectCommandHelper {
       String modulesToFocusOn,
       boolean combinedProject,
       boolean createProjectSchemes,
+      boolean createTargetSchemes,
       boolean dryRun,
       boolean readOnly,
       PathOutputPresenter outputPresenter,
@@ -210,6 +212,7 @@ public class XCodeProjectCommandHelper {
     this.modulesToFocusOn = modulesToFocusOn;
     this.combinedProject = combinedProject;
     this.createProjectSchemes = createProjectSchemes;
+    this.createTargetSchemes = createTargetSchemes;
     this.dryRun = dryRun;
     this.readOnly = readOnly;
     this.outputPresenter = outputPresenter;
@@ -379,6 +382,7 @@ public class XCodeProjectCommandHelper {
             .setShouldUseShortNamesForTargets(true)
             .setShouldCreateDirectoryStructure(combinedProject)
             .setShouldGenerateProjectSchemes(createProjectSchemes)
+            .setShouldGenerateTargetSchemes(createTargetSchemes)
             .build();
 
     LOG.debug("Xcode project generation: Generates workspaces for targets");
