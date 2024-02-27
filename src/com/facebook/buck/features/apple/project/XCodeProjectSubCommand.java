@@ -39,6 +39,7 @@ public class XCodeProjectSubCommand extends ProjectSubCommand {
 
   private static final boolean DEFAULT_READ_ONLY_VALUE = false;
   private static final boolean DEFAULT_PROJECT_SCHEMES = false;
+  private static final boolean DEFAULT_TARGET_SCHEMES = false;
   private static final boolean DEFAULT_ABSOLUTE_HEADER_MAP_PATHS = false;
   private static final boolean DEFAULT_SHARED_LIBRARIES_AS_DYNAMIC_FRAMEWORKS = false;
 
@@ -51,6 +52,11 @@ public class XCodeProjectSubCommand extends ProjectSubCommand {
       name = "--project-schemes",
       usage = "Generate an xcode scheme for each sub-project with its targets and tests.")
   private boolean projectSchemes = false;
+
+  @Option(
+      name = "--target-schemes",
+      usage = "Generate an xcode scheme for each sub-target with its targets and tests.")
+  private boolean targetSchemes = false;
 
   @Option(
       name = "--focus",
@@ -139,6 +145,7 @@ public class XCodeProjectSubCommand extends ProjectSubCommand {
               modulesToFocusOn,
               combinedProject,
               getProjectSchemes(params.getBuckConfig()),
+              getTargetSchemes(params.getBuckConfig()),
               projectGeneratorParameters.isDryRun(),
               getReadOnly(params.getBuckConfig()),
               new PrintStreamPathOutputPresenter(
@@ -183,6 +190,7 @@ public class XCodeProjectSubCommand extends ProjectSubCommand {
                   projectGeneratorParameters.isWithoutDependenciesTests(),
                   modulesToFocusOn,
                   getProjectSchemes(params.getBuckConfig()),
+                  getTargetSchemes(params.getBuckConfig()),
                   projectGeneratorParameters.isDryRun(),
                   getReadOnly(params.getBuckConfig()),
                   new PrintStreamPathOutputPresenter(
@@ -212,6 +220,12 @@ public class XCodeProjectSubCommand extends ProjectSubCommand {
     // command line arg takes precedence over buck config
     return projectSchemes
         || buckConfig.getBooleanValue("project", "project_schemes", DEFAULT_PROJECT_SCHEMES);
+  }
+
+  private boolean getTargetSchemes(BuckConfig buckConfig) {
+    // command line arg takes precedence over buck config
+    return targetSchemes
+        || buckConfig.getBooleanValue("project", "target_schemes", DEFAULT_TARGET_SCHEMES);
   }
 
   private boolean getReadOnly(BuckConfig buckConfig) {

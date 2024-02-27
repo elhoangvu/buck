@@ -68,6 +68,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
@@ -91,6 +92,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import com.facebook.buck.apple.AppleLibraryDescription;
 import com.facebook.buck.apple.AppleLibraryDescriptionArg;
+import com.facebook.buck.apple.AppleTestDescription;
 
 public class WorkspaceAndProjectGenerator {
   private static final Logger LOG = Logger.get(WorkspaceAndProjectGenerator.class);
@@ -325,6 +327,13 @@ public class WorkspaceAndProjectGenerator {
             schemeUngroupedTestTargets);
       }
 
+      if (projectGeneratorOptions.shouldGenerateTargetSchemes()) {
+        writeWorkspaceSchemesForTargets(
+            generatedProjectToPbxTargets,
+            targetToProjectPathMap
+        );
+      }
+
       writeWorkspaceSchemes(
           workspaceName,
           outputDirectory,
@@ -457,13 +466,14 @@ public class WorkspaceAndProjectGenerator {
       BuildTarget buildTarget = targetNode.getBuildTarget();
       projectCellToBuildTargetsBuilder.put(rootCell.getCell(buildTarget.getCell()), buildTarget);
       Optional<String> groupName = Optional.empty();
-      if (targetNode.getDescription() instanceof AppleLibraryDescription) {
-        AppleLibraryDescriptionArg args = (AppleLibraryDescriptionArg)targetNode.getConstructorArg();
-        groupName = args.getGroupName();
-      }
-
       if (targetNode.getDescription() instanceof AppleBundleDescription) {
         AppleBundleDescriptionArg args = (AppleBundleDescriptionArg)targetNode.getConstructorArg();
+        groupName = args.getGroupName();
+      } else if (targetNode.getDescription() instanceof AppleLibraryDescription) {
+        AppleLibraryDescriptionArg args = (AppleLibraryDescriptionArg)targetNode.getConstructorArg();
+        groupName = args.getGroupName();
+      } else if (targetNode.getDescription() instanceof AppleTestDescription) {
+        AppleTestDescriptionArg args = (AppleTestDescriptionArg)targetNode.getConstructorArg();
         groupName = args.getGroupName();
       }
 
@@ -1216,6 +1226,45 @@ public class WorkspaceAndProjectGenerator {
 
       schemeGenerator.writeScheme();
       schemeGenerators.put(schemeName, schemeGenerator);
+    }
+  }
+
+  private void writeWorkspaceSchemesForTargets(
+      ImmutableSetMultimap<PBXProject, PBXTarget> generatedProjectToPbxTargets,
+      ImmutableMap<PBXTarget, Path> targetToProjectPathMap
+  ) throws IOException {
+    for (PBXProject project : generatedProjectToPbxTargets.keys()) {
+      ImmutableSet<PBXTarget> projectTargets = generatedProjectToPbxTargets.get(project);
+      ImmutableSetMultimap.Builder<String, PBXTarget> targetMapBuilder = ImmutableSetMultimap.builder();
+      for (PBXTarget target : projectTargets) {
+        targetMapBuilder.put(target.getName(), target);
+      }
+      
+      ImmutableSetMultimap<String, PBXTarget> targetMap = targetMapBuilder.build();
+      for (PBXTarget target : projectTargets) {
+        Path projectOutputDirectory = targetToProjectPathMap.get(target);
+        String schemeName = target.getName();
+        String testName = schemeName + "Tests";
+        ImmutableSet<PBXTarget> testTargets = targetMap.get(testName);
+        
+        ImmutableSet<PBXTarget> orderedBuildTargets = ImmutableSet.of(target);
+        SchemeGenerator schemeGenerator =
+        buildSchemeGenerator(
+            targetToProjectPathMap,
+            projectOutputDirectory,
+            schemeName,
+            Optional.empty(),
+            Optional.empty(),
+            orderedBuildTargets,
+            testTargets,
+            testTargets,
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty());
+
+        schemeGenerator.writeScheme();
+        schemeGenerators.put(schemeName, schemeGenerator);
+      }
     }
   }
 

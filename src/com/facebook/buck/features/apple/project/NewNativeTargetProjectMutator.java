@@ -353,8 +353,15 @@ class NewNativeTargetProjectMutator {
                                             PBXGroup targetGroup, 
                                             ProjectFilesystem fileSystem) {
     String sourcesDir = "Sources";
+    String mainTargetName = targetGroup.getName();
+    if (productType == ProductTypes.UNIT_TEST
+      || productType == ProductTypes.UI_TEST) {
+      sourcesDir = "Tests";
+      mainTargetName = mainTargetName.replaceAll("Tests$", "");
+    }
+
     PBXGroup sourcesGroup = targetGroup.getOrCreateChildGroupByName(sourcesDir);
-    Path originalPath = Paths.get(this.originalPath.toString(), targetGroup.getName(), sourcesDir);
+    Path originalPath = Paths.get(this.originalPath.toString(), mainTargetName, sourcesDir);
 
     if (fileSystem.exists(originalPath)) {
       Path relativePath = pathRelativizer.outputDirToRootRelative(originalPath);
