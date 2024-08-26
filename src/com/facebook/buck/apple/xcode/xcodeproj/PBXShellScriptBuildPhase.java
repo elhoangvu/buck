@@ -33,6 +33,7 @@ public class PBXShellScriptBuildPhase extends PBXBuildPhase {
   @Nullable private String shellScript;
 
   private Boolean showEnvVarsInLog = false;
+  private Boolean alwaysOutOfDate = false;
 
   private static final NSString DEFAULT_SHELL_PATH = new NSString("/bin/sh");
   private static final NSString DEFAULT_SHELL_SCRIPT = new NSString("");
@@ -73,6 +74,15 @@ public class PBXShellScriptBuildPhase extends PBXBuildPhase {
   /** Returns the list (possibly empty) of .xcfilelist files that contain inputs for the script */
   public List<String> getOutputFileListPaths() {
     return outputFileListPaths;
+  }
+
+  /** Returns `alwaysOutOfDate` aka `Based on dependency analysis` */
+  public Boolean getAlwaysOutOfDate() {
+    return alwaysOutOfDate;
+  }
+
+  public void setAlwaysOutOfDate(Boolean alwaysOutOfDate) {
+    this.alwaysOutOfDate = alwaysOutOfDate;
   }
 
   /**
@@ -132,6 +142,7 @@ public class PBXShellScriptBuildPhase extends PBXBuildPhase {
     }
     s.addField("shellScript", shellScriptString);
     s.addField("showEnvVarsInLog", showEnvVarsInLog);
+    s.addField("alwaysOutOfDate", alwaysOutOfDate);
   }
 
   /** Converts List of Strings into NSArray of NSStrings */
