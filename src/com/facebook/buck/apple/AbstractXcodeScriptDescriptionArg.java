@@ -20,6 +20,7 @@ import com.facebook.buck.core.description.arg.BuildRuleArg;
 import com.facebook.buck.core.description.arg.HasSrcs;
 import com.facebook.buck.core.util.immutables.RuleArg;
 import com.google.common.collect.ImmutableSortedSet;
+import java.util.Optional;
 import org.immutables.value.Value;
 
 @RuleArg
@@ -35,6 +36,8 @@ interface AbstractXcodeScriptDescriptionArg extends BuildRuleArg, HasSrcs {
 
   @Value.NaturalOrder
   ImmutableSortedSet<String> getOutputFileLists();
+
+  Optional<Boolean> getAlwaysOutOfDate();
 
   String getCmd();
 }

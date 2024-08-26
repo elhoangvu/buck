@@ -832,6 +832,7 @@ class NewNativeTargetProjectMutator {
         shellScriptBuildPhase.getInputFileListPaths().addAll(arg.getInputFileLists());
         shellScriptBuildPhase.getOutputPaths().addAll(arg.getOutputs());
         shellScriptBuildPhase.getOutputFileListPaths().addAll(arg.getOutputFileLists());
+        shellScriptBuildPhase.setAlwaysOutOfDate(arg.getAlwaysOutOfDate().orElse(false));
         shellScriptBuildPhase.setShellScript(arg.getCmd());
         shellScriptBuildPhase.setName(Optional.of(arg.getName()));
       } else if (node.getDescription() instanceof JsBundleOutputsDescription) {
