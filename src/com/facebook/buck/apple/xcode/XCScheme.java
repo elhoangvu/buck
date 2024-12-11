@@ -252,6 +252,7 @@ public class XCScheme {
     private final Optional<String> remoteRunnablePath;
     private final Optional<WatchInterface> watchInterface;
     private final LaunchStyle launchStyle;
+    private final boolean disablePerformanceAntipatternChecker;
     private final Optional<ImmutableMap<String, String>> environmentVariables;
     private final Optional<BuildableReference> expandVariablesBasedOn;
     private final Optional<ImmutableMap<String, String>> commandLineArguments;
@@ -266,6 +267,7 @@ public class XCScheme {
         Optional<String> remoteRunnablePath,
         Optional<WatchInterface> watchInterface,
         LaunchStyle launchStyle,
+        boolean disablePerformanceAntipatternChecker,
         Optional<ImmutableMap<String, String>> environmentVariables,
         Optional<BuildableReference> expandVariablesBasedOn,
         Optional<ImmutableMap<String, String>> commandLineArguments,
@@ -281,6 +283,7 @@ public class XCScheme {
       this.remoteRunnablePath = remoteRunnablePath;
       this.watchInterface = watchInterface;
       this.launchStyle = launchStyle;
+      this.disablePerformanceAntipatternChecker = disablePerformanceAntipatternChecker;
       this.environmentVariables = environmentVariables;
       this.expandVariablesBasedOn = expandVariablesBasedOn;
       this.commandLineArguments = commandLineArguments;
@@ -315,6 +318,10 @@ public class XCScheme {
 
     public LaunchStyle getLaunchStyle() {
       return launchStyle;
+    }
+
+    public boolean getDisablePerformanceAntipatternChecker() {
+      return disablePerformanceAntipatternChecker;
     }
 
     public Optional<ImmutableMap<String, String>> getEnvironmentVariables() {

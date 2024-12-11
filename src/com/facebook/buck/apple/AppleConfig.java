@@ -262,6 +262,10 @@ public class AppleConfig implements ConfigView<BuckConfig> {
     return delegate.getBooleanValue(APPLE_SECTION, "xcode_disable_parallelize_build", false);
   }
 
+  public boolean getDisablePerformanceAntipatternChecker() {
+    return delegate.getBooleanValue(APPLE_SECTION, "disable_performance_antipattern_checker", false);
+  }
+
   public boolean useDryRunCodeSigning() {
     return delegate.getBooleanValue(APPLE_SECTION, "dry_run_code_signing", false);
   }

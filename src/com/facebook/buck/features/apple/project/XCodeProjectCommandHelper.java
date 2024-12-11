@@ -534,6 +534,7 @@ public class XCodeProjectCommandHelper {
               combinedProject,
               focusModules,
               !appleConfig.getXcodeDisableParallelizeBuild(),
+              appleConfig.getDisablePerformanceAntipatternChecker(),
               defaultCxxPlatform,
               appleCxxFlavors,
               buckConfig.getView(ParserConfig.class).getBuildFileName(),

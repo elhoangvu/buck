@@ -76,6 +76,7 @@ class SchemeGenerator {
   private final String schemeName;
   private final Path outputDirectory;
   private final boolean parallelizeBuild;
+  private final boolean disablePerformanceAntipatternChecker;
   private final boolean wasCreatedForAppExtension;
   private final Optional<String> runnablePath;
   private final Optional<String> remoteRunnablePath;
@@ -107,6 +108,7 @@ class SchemeGenerator {
       String schemeName,
       Path outputDirectory,
       boolean parallelizeBuild,
+      boolean disablePerformanceAntipatternChecker,
       Optional<Boolean> wasCreatedForAppExtension,
       Optional<String> runnablePath,
       Optional<String> remoteRunnablePath,
@@ -135,6 +137,7 @@ class SchemeGenerator {
     this.schemeName = schemeName;
     this.outputDirectory = outputDirectory;
     this.parallelizeBuild = parallelizeBuild;
+    this.disablePerformanceAntipatternChecker = disablePerformanceAntipatternChecker;
     this.wasCreatedForAppExtension = wasCreatedForAppExtension.orElse(false);
     this.runnablePath = runnablePath;
     this.remoteRunnablePath = remoteRunnablePath;
@@ -303,6 +306,7 @@ class SchemeGenerator {
                     remoteRunnablePath,
                     watchInterface,
                     launchStyle,
+                    disablePerformanceAntipatternChecker,
                     Optional.ofNullable(envVariables.get(SchemeActionType.LAUNCH)),
                     Optional.ofNullable(envVariablesBasedOn.get(SchemeActionType.LAUNCH)),
                     Optional.ofNullable(commandLineArgs.get(SchemeActionType.LAUNCH)),
@@ -586,6 +590,10 @@ class SchemeGenerator {
     XCScheme.LaunchAction.LaunchStyle launchStyle = launchAction.getLaunchStyle();
     launchActionElem.setAttribute(
         "launchStyle", launchStyle == XCScheme.LaunchAction.LaunchStyle.AUTO ? "0" : "1");
+
+    boolean disablePerformanceAntipatternChecker = launchAction.getDisablePerformanceAntipatternChecker();
+    launchActionElem.setAttribute(
+        "disablePerformanceAntipatternChecker", disablePerformanceAntipatternChecker ? "YES" : "NO");
 
     if (launchAction.getEnvironmentVariables().isPresent()) {
       if (launchAction.getExpandVariablesBasedOn().isPresent()) {
