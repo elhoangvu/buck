@@ -94,6 +94,7 @@ public class WorkspaceAndProjectGenerator {
   private final FocusedTargetMatcher focusedTargetMatcher; // @audited (chatatap)
   private final ProjectGeneratorOptions projectGeneratorOptions;
   private final boolean parallelizeBuild;
+  private final boolean disablePerformanceAntipatternChecker;
   private final CxxPlatform defaultCxxPlatform;
   private final ImmutableSet<Flavor> appleCxxFlavors;
 
@@ -140,6 +141,7 @@ public class WorkspaceAndProjectGenerator {
       ProjectGeneratorOptions projectGeneratorOptions,
       FocusedTargetMatcher focusedTargetMatcher,
       boolean parallelizeBuild,
+      boolean disablePerformanceAntipatternChecker,
       CxxPlatform defaultCxxPlatform,
       ImmutableSet<Flavor> appleCxxFlavors,
       String buildFileName,
@@ -161,6 +163,7 @@ public class WorkspaceAndProjectGenerator {
     this.workspaceBuildTarget = workspaceBuildTarget;
     this.projectGeneratorOptions = projectGeneratorOptions;
     this.parallelizeBuild = parallelizeBuild;
+    this.disablePerformanceAntipatternChecker = disablePerformanceAntipatternChecker;
     this.defaultCxxPlatform = defaultCxxPlatform;
     this.appleCxxFlavors = appleCxxFlavors;
     this.buildFileName = buildFileName;
@@ -974,6 +977,7 @@ public class WorkspaceAndProjectGenerator {
         schemeName,
         outputDirectory,
         parallelizeBuild,
+        disablePerformanceAntipatternChecker,
         wasCreatedForAppExtension,
         runnablePath,
         remoteRunnablePath,
